@@ -22,3 +22,5 @@ data/*.csv
 *.swp
 *.swo
 *~
+
+plan.md
