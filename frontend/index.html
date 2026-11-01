@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APIWatch – API Testing & Monitoring Tool</title>
+  <meta name="description" content="A lightweight API testing and monitoring tool. Send HTTP requests, validate responses, monitor endpoints, and track history." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">APIWatch</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" class="nav-link active" data-section="dashboard" id="nav-dashboard">
+        <span class="nav-icon">🏠</span><span>Dashboard</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="tester" id="nav-tester">
+        <span class="nav-icon">🚀</span><span>API Tester</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="collections" id="nav-collections">
+        <span class="nav-icon">📁</span><span>Collections</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="monitoring" id="nav-monitoring">
+        <span class="nav-icon">📡</span><span>Monitoring</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="history" id="nav-history">
+        <span class="nav-icon">🕒</span><span>History</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-section="reports" id="nav-reports">
+        <span class="nav-icon">📊</span><span>Reports</span>
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="http://localhost:8000/docs" target="_blank" class="docs-link">📖 API Docs</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ─── Dashboard Section ─── -->
+    <section id="section-dashboard" class="section active">
+      <div class="section-header">
+        <h1>Dashboard</h1>
+        <p>Overview of your API testing activity</p>
+      </div>
+
+      <div class="stats-grid" id="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-icon">📨</div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-label">Total Requests</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="stat-success">—</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-card error">
+          <div class="stat-icon">❌</div>
+          <div class="stat-value" id="stat-failed">—</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value" id="stat-avg-time">—</div>
+          <div class="stat-label">Avg Response Time</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Recent Activity</h2>
+          <button class="btn btn-sm btn-ghost" onclick="loadDashboard()">↻ Refresh</button>
+        </div>
+        <div id="recent-activity">
+          <div class="empty-state">No requests yet. Go to API Tester to get started!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── API Tester Section ─── -->
+    <section id="section-tester" class="section">
+      <div class="section-header">
+        <h1>API Tester</h1>
+        <p>Send HTTP requests and inspect responses</p>
+      </div>
+
+      <div class="tester-layout">
+        <!-- Request Panel -->
+        <div class="card request-panel">
+          <div class="request-bar">
+            <select id="method-select" class="method-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <input type="text" id="url-input" class="url-input"
+              placeholder="https://api.example.com/endpoint"
+              value="https://httpbin.org/get" />
+            <button class="btn btn-primary" id="send-btn" onclick="sendRequest()">Send</button>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tab-bar">
+            <button class="tab-btn active" data-tab="headers-tab">Headers</button>
+            <button class="tab-btn" data-tab="body-tab">Body</button>
+            <button class="tab-btn" data-tab="params-tab">Params</button>
+            <button class="tab-btn" data-tab="assertions-tab">Assertions</button>
+          </div>
+
+          <!-- Headers Tab -->
+          <div class="tab-content active" id="headers-tab">
+            <div class="kv-editor" id="headers-editor">
+              <div class="kv-row kv-header-row">
+                <span>Key</span><span>Value</span><span></span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="addKVRow('headers-editor')">+ Add Header</button>
+          </div>
+
+          <!-- Body Tab -->
+          <div class="tab-content" id="body-tab">
+            <textarea id="body-input" class="code-editor"
+              placeholder='{\n  "key": "value"\n}'
+              rows="10"></textarea>
+          </div>
+
+          <!-- Query Params Tab -->
+          <div class="tab-content" id="params-tab">
+            <div class="kv-editor" id="params-editor">
+              <div class="kv-row kv-header-row">
+                <span>Key</span><span>Value</span><span></span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="addKVRow('params-editor')">+ Add Param</button>
+          </div>
+
+          <!-- Assertions Tab -->
+          <div class="tab-content" id="assertions-tab">
+            <div id="assertions-list"></div>
+            <button class="btn btn-sm btn-ghost" onclick="addAssertion()">+ Add Assertion</button>
+          </div>
+
+          <!-- Save Request -->
+          <div class="save-bar">
+            <input type="text" id="save-name" placeholder="Request name (optional)" class="input-sm" />
+            <select id="save-collection" class="input-sm">
+              <option value="">Select collection...</option>
+            </select>
+            <button class="btn btn-sm btn-secondary" onclick="saveCurrentRequest()">💾 Save</button>
+          </div>
+        </div>
+
+        <!-- Response Panel -->
+        <div class="card response-panel">
+          <div class="card-header">
+            <h2>Response</h2>
+            <div id="response-meta" class="response-meta"></div>
+          </div>
+
+          <div id="response-loading" class="loading hidden">⏳ Sending request…</div>
+
+          <div id="assertion-results" class="assertion-results hidden"></div>
+
+          <div class="tab-bar">
+            <button class="tab-btn active" data-tab="resp-body-tab">Body</button>
+            <button class="tab-btn" data-tab="resp-headers-tab">Headers</button>
+          </div>
+          <div class="tab-content active" id="resp-body-tab">
+            <pre id="response-body" class="response-body">Send a request to see the response</pre>
+          </div>
+          <div class="tab-content" id="resp-headers-tab">
+            <pre id="response-headers" class="response-body">—</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Collections Section ─── -->
+    <section id="section-collections" class="section">
+      <div class="section-header">
+        <h1>Collections</h1>
+        <p>Save and organize your API requests</p>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="showNewCollectionModal()">+ New Collection</button>
+      </div>
+
+      <div id="collections-list" class="collections-grid">
+        <div class="empty-state">No collections yet. Create one to save requests.</div>
+      </div>
+
+      <!-- New Collection Modal -->
+      <div class="modal-overlay hidden" id="collection-modal">
+        <div class="modal">
+          <h3 id="collection-modal-title">New Collection</h3>
+          <input type="text" id="collection-name" placeholder="Collection name" class="input-full" />
+          <textarea id="collection-desc" placeholder="Description (optional)" class="input-full" rows="2"></textarea>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('collection-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveCollection()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Request to Collection Modal -->
+      <div class="modal-overlay hidden" id="save-request-modal">
+        <div class="modal">
+          <h3>Save Request</h3>
+          <input type="text" id="sr-name" placeholder="Request name" class="input-full" />
+          <input type="text" id="sr-method" placeholder="Method (e.g. GET)" class="input-full" />
+          <input type="text" id="sr-url" placeholder="URL" class="input-full" />
+          <textarea id="sr-headers" placeholder='{"Content-Type": "application/json"}' class="input-full" rows="2"></textarea>
+          <textarea id="sr-body" placeholder="Request body (JSON)" class="input-full" rows="2"></textarea>
+          <input type="hidden" id="sr-collection-id" />
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('save-request-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveSavedRequest()">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Monitoring Section ─── -->
+    <section id="section-monitoring" class="section">
+      <div class="section-header">
+        <h1>Monitoring</h1>
+        <p>Track endpoint availability and uptime</p>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="showEndpointModal()">+ Add Endpoint</button>
+        <button class="btn btn-secondary" onclick="checkAllEndpoints()">▶ Check All</button>
+      </div>
+
+      <div id="monitoring-list" class="monitoring-grid">
+        <div class="empty-state">No endpoints registered. Add one to start monitoring.</div>
+      </div>
+
+      <!-- Add Endpoint Modal -->
+      <div class="modal-overlay hidden" id="endpoint-modal">
+        <div class="modal">
+          <h3>Register Endpoint</h3>
+          <input type="text" id="ep-name" placeholder="Name (e.g. My API)" class="input-full" />
+          <input type="text" id="ep-url" placeholder="https://api.example.com/health" class="input-full" />
+          <select id="ep-method" class="input-full">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+          </select>
+          <input type="number" id="ep-status" placeholder="Expected status (default 200)" class="input-full" value="200" />
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal('endpoint-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEndpoint()">Register</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── History Section ─── -->
+    <section id="section-history" class="section">
+      <div class="section-header">
+        <h1>History</h1>
+        <p>Browse previous API requests</p>
+      </div>
+
+      <div class="toolbar">
+        <input type="text" id="history-search" placeholder="Search by URL…" class="input-sm" oninput="loadHistory()" />
+        <select id="history-method-filter" class="input-sm" onchange="loadHistory()">
+          <option value="">All Methods</option>
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+          <option value="PATCH">PATCH</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+        <button class="btn btn-sm btn-danger" onclick="clearHistory()">🗑 Clear All</button>
+      </div>
+
+      <div class="card">
+        <table class="data-table" id="history-table">
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>URL</th>
+              <th>Status</th>
+              <th>Time (ms)</th>
+              <th>Result</th>
+              <th>Timestamp</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="7" class="empty-state">No history yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- History Detail Modal -->
+      <div class="modal-overlay hidden" id="history-detail-modal">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3>Request Details</h3>
+            <button class="btn btn-ghost" onclick="closeModal('history-detail-modal')">✕</button>
+          </div>
+          <div id="history-detail-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Reports Section ─── -->
+    <section id="section-reports" class="section">
+      <div class="section-header">
+        <h1>Reports</h1>
+        <p>Export data and view summary statistics</p>
+      </div>
+
+      <div class="stats-grid" id="report-stats">
+        <div class="stat-card">
+          <div class="stat-icon">📨</div>
+          <div class="stat-value" id="rpt-total">—</div>
+          <div class="stat-label">Total Requests</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="rpt-success">—</div>
+          <div class="stat-label">Successful (2xx-3xx)</div>
+        </div>
+        <div class="stat-card error">
+          <div class="stat-icon">❌</div>
+          <div class="stat-value" id="rpt-failed">—</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-icon">⏱</div>
+          <div class="stat-value" id="rpt-avg">—</div>
+          <div class="stat-label">Avg Response Time</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Export Report</h2>
+        </div>
+        <p>Download all request history as a CSV file including method, URL, status code, response time, timestamp, and test result.</p>
+        <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+          <a href="/api/reports/csv" class="btn btn-primary" download="apiwatch_report.csv">⬇ Download CSV Report</a>
+          <button class="btn btn-secondary" onclick="loadReportStats()">↻ Refresh Stats</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
